@@ -1,6 +1,3 @@
-# UIvent
-SBD Final Project 
-
 # UIvent - Sistem Manajemen Proker Mahasiswa UI
 
 UIvent adalah platform berbasis web untuk manajemen dan dokumentasi program kerja (proker) atau event yang diadakan oleh organisasi kemahasiswaan di Universitas Indonesia. Aplikasi ini membantu organisasi seperti BEM, Himpunan, dan UKM untuk mengelola, mempublikasikan, dan melacak status acara mereka dengan mudah, serta mempermudah untuk mendapatkan peserta
