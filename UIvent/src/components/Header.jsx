@@ -1,4 +1,3 @@
-// File: src/components/Header.jsx
 import { useNavigate } from 'react-router-dom';
 
 export default function Header({ refs }) {
@@ -30,6 +29,12 @@ export default function Header({ refs }) {
                     className="text-gray-600 hover:text-yellow-600 transition-colors text-sm font-medium tracking-wide"
                 >
                     Contact
+                </button>
+                <button
+                    onClick={() => navigate('/events')}
+                    className="text-gray-600 hover:text-yellow-600 transition-colors text-sm font-medium tracking-wide"
+                >
+                    Events
                 </button>
                 <button 
                     onClick={() => navigate('/auth')}

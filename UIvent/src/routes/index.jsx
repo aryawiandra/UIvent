@@ -1,6 +1,8 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Home from '../pages/Home';
 import AuthPage from '../pages/AuthPage';
+import Events from '../pages/Events';
+import EventDetails from '../pages/EventDetails';
 
 export default function AppRoutes() {
     return (
@@ -8,6 +10,8 @@ export default function AppRoutes() {
             <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/auth" element={<AuthPage />} />
+                <Route path="/events" element={<Events />} />
+                <Route path="/events/:id" element={<EventDetails />} />
             </Routes>
         </Router>
     );
