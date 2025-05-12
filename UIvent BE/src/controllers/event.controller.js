@@ -22,15 +22,16 @@ exports.createEvent = async (req, res) => {
 
     const {start_date, start_time, end_date, end_time} = req.body;
 
-    const start_datetime = `${start_date}T${start_time}:00+07:00`;
-    const end_datetime = `${end_date}T${end_time}:00+07:00`;
+    const start_datetime = `${start_date}T${start_time}:00Z`;
+    const end_datetime = `${end_date}T${end_time}:00Z`;
 
     try {
-        const event = await eventRepository.createEveht({ start_datetime, end_datetime }, req.body);
-        return baseResponse(res, true, 201, "Store created successfully", event);
+        const event = await eventRepository.createEvent({ start_datetime, end_datetime }, req.body);
+        return baseResponse(res, true, 201, "Event created successfully", event);
     }
     catch (error) {
-        return baseResponse(res, false, 500, error.message || "Server Error", error);
+        console.error("Server error", error);
+        return baseResponse(res, false, 500, "Server Error", null);
     }
 };
 
@@ -45,22 +46,24 @@ exports.getAllEvents = async (req, res) => {
         return baseResponse(res, true, 200, "Events retrieved successfully", events);
     }
     catch (error) {
-        return baseResponse(res, false, 500, error.message || "Server Error", error);
+        console.error("Server error", error);
+        return baseResponse(res, false, 500, "Server Error", null);
     }
 };
 
 exports.getEventById = async (req, res) => {
     try {
-        const event = await eventRepository.getStoreById(req.params.id);
+        const event = await eventRepository.getEventById(req.params.id);
 
-        if(!store) {
-            return baseResponse(res, false, 400, "Event not found", null);
+        if(!event) {
+            return baseResponse(res, false, 404, "Event not found", null);
         }
         
         return baseResponse(res, true, 201, "Event found", event);
     }
     catch (error) {
-        return baseResponse(res, false, 500, error.message || "Server Error", error);
+        console.error("Server error", error);
+        return baseResponse(res, false, 500, "Server Error", null);
     }
 }
 
@@ -83,8 +86,13 @@ exports.updateEvent = async (req, res) => {
         return baseResponse(res, false, 400, "Please enter the required fields", null);
     }
 
+    const {start_date, start_time, end_date, end_time} = req.body;
+
+    const start_datetime = `${start_date}T${start_time}:00Z`;
+    const end_datetime = `${end_date}T${end_time}:00Z`;
+
     try {
-        const event = await eventRepository.updateEvent(req.params.id, req.body);
+        const event = await eventRepository.updateEvent(req.params.id, { start_datetime, end_datetime }, req.body);
 
         if (!event) {
             return baseResponse(res, false, 404, "Event not found", null);
@@ -93,7 +101,8 @@ exports.updateEvent = async (req, res) => {
         return baseResponse(res, true, 200, "Event updated successfully", event);
     }
     catch (error) {
-        return baseResponse(res, false, 500, error.message || "Server Error", error);
+        console.error("Server error", error);
+        return baseResponse(res, false, 500, "Server Error", null);
     }
 };
 
@@ -108,6 +117,7 @@ exports.deleteEvent = async (req, res) => {
         return baseResponse(res, true, 200, "Event deleted successfully", event);
     }
     catch (error) {
-        return baseResponse(res, false, 500, error.message || "Server Error", error);
+        console.error("Server error", error);
+        return baseResponse(res, false, 500, "Server Error", null);
     }
 };

@@ -36,6 +36,11 @@ exports.createEvent = async (datetime, event) => {
 exports.getAllEvents = async () => {
     try {
         const res = await db.query("SELECT * FROM events");
+
+        if (!res?.rows) {
+            return null;
+        }
+
         return res.rows;
     }
     catch(error) {
@@ -49,6 +54,11 @@ exports.getEventById = async (id) => {
             "SELECT * FROM events WHERE id = $1", 
             [id]
         );
+
+        if (!res?.rows[0]) {
+            return null;
+        }
+
         return res.rows[0];
     }
     catch (error) {
@@ -56,7 +66,7 @@ exports.getEventById = async (id) => {
     }
 }
 
-exports.updateEvent = async (id, event) => {
+exports.updateEvent = async (id, datetime, event) => {
     try {
         const res = await db.query(
             `UPDATE events 
@@ -74,14 +84,19 @@ exports.updateEvent = async (id, event) => {
                 event.title, 
                 event.description, 
                 event.venue, 
-                event.time_start, 
-                event.time_end, 
+                datetime.start_datetime, 
+                datetime.end_datetime, 
                 event.status, 
                 event.category_id, 
                 event.organizer_id,
                 id
             ]
         );
+
+        if (!res?.rows[0]) {
+            return null;
+        }
+
         return res.rows[0];
     }
     catch (error) {
@@ -95,6 +110,11 @@ exports.deleteEvent = async (id) => {
             "DELETE FROM events WHERE id = $1 RETURNING *", 
             [id]
         );
+
+        if (!res?.rows[0]) {
+            return null;
+        }
+        
         return res.rows[0];
     }
     catch (error) {

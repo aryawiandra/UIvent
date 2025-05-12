@@ -8,6 +8,11 @@ exports.registerUser = async (name, email, hash) => {
              RETURNING *`,
             [name, email, hash]
         );
+
+        if (!res?.rows[0]) {
+            return null;
+        }
+
         return res.rows[0];
     }
     catch (error) {
@@ -21,6 +26,11 @@ exports.getUserByEmail = async (email) => {
             "SELECT * FROM users WHERE email = $1", 
             [email]
         );
+
+        if (!res?.rows[0]) {
+            return null;
+        }
+        
         return res.rows[0];
     }
     catch (error) {

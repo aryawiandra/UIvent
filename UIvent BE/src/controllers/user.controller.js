@@ -25,19 +25,20 @@ exports.registerUser = async (req, res) => {
     }
 
     try {
-        const userExist = await userRepository.getUserByEmail(email);
-        if (userExist) {
-            return baseResponse(res, false, 409, "Email already used", null);
-        }
-
         const salt = await bcrypt.genSalt(saltRounds);
         const hash = await bcrypt.hash(password, salt);
         
         const user = await userRepository.registerUser(name, email, hash);
+
+        if (!user) {
+            return baseResponse(res, false, 409, "Email already used", null);
+        }
+
         return baseResponse(res, true, 201, "User created", user);
     }
     catch (error) {
-        return baseResponse(res, false, 500, error.message || "Server Error", error);
+        console.error("Server error", error);
+        return baseResponse(res, false, 500, "Server Error", null);
     }
 };
 
@@ -59,7 +60,8 @@ exports.loginUser = async (req, res) => {
         return baseResponse(res, true, 200, "Login success", user);
     }
     catch (error) {
-        return baseResponse(res, false, 500, error.message || "Server Error", error);
+        console.error("Server error", error);
+        return baseResponse(res, false, 500, "Server Error", null);
     }
 };
 
@@ -74,7 +76,8 @@ exports.getUser = async (req, res) => {
         return baseResponse(res, true, 200, "User found", user);
     }
     catch (error) {
-        return baseResponse(res, false, 500, error.message || "Server Error", error);
+        console.error("Server error", error);
+        return baseResponse(res, false, 500, "Server Error", null);
     }
 };
 
