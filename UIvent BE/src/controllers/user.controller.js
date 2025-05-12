@@ -37,7 +37,7 @@ exports.registerUser = async (req, res) => {
         return baseResponse(res, true, 201, "User created", user);
     }
     catch (error) {
-        baseResponse(res, false, 500, error.message || "Server Error", error);
+        return baseResponse(res, false, 500, error.message || "Server Error", error);
     }
 };
 
@@ -59,7 +59,7 @@ exports.loginUser = async (req, res) => {
         return baseResponse(res, true, 200, "Login success", user);
     }
     catch (error) {
-        baseResponse(res, false, 500, error.message || "Server Error", error);
+        return baseResponse(res, false, 500, error.message || "Server Error", error);
     }
 };
 
@@ -68,14 +68,13 @@ exports.getUser = async (req, res) => {
         const user = await userRepository.getUserByEmail(req.params.email);
 
         if (!user) {
-            baseResponse(res, false, 404, "User not found", null);
+            return baseResponse(res, false, 404, "User not found", null);
         }
-        else {
-            baseResponse(res, true, 200, "User found", user);
-        }
+        
+        return baseResponse(res, true, 200, "User found", user);
     }
     catch (error) {
-        baseResponse(res, false, 500, error.message || "Server Error", error);
+        return baseResponse(res, false, 500, error.message || "Server Error", error);
     }
 };
 

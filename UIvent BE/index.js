@@ -15,7 +15,7 @@ app.use(cors(corsOptions));
 app.use(express.json());
 
 app.use('/api/auth', require("./src/routes/user.route"));
-// app.use('/api/events', require("./src/routes/event.route"));
+app.use('/api/events', require("./src/routes/event.route"));
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
