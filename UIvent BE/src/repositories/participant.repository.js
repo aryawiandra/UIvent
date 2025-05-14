@@ -42,6 +42,24 @@ exports.getParticipantsByEvent = async (event_id) => {
     }
 }
 
+exports.updateRating = async (id, rating) => {
+    try {
+        const res = await db.query(
+            "UPDATE participants SET rating = $1 WHERE id = $2 RETURNING *",
+            [rating, id]
+        );
+
+        if (!res?.rows[0]) {
+            return null;
+        }
+
+        return res.rows[0];
+    }
+    catch (error) {
+        console.error("Error executing query", error);
+    }
+}
+
 exports.deleteParticipant = async (participant) => {
     try {
         const res = await db.query(

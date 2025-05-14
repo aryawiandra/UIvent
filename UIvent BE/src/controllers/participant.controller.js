@@ -42,6 +42,25 @@ exports.getParticipantsByEvent = async (req, res) => {
     }
 }
 
+exports.updateRating = async (req, res) => {
+    if (!req.body.rating) {
+        return baseResponse(res, false, 400, "Missing rating", null);
+    }
+    try {
+        const participant = await participantRepository.updateRating(req.params.id, req.body.rating);
+
+        if (!participant) {
+            return baseResponse(res, false, 404, "Participant not found", null);
+        }
+
+        return baseResponse(res, true, 200, "Participant rating updated successfully", participant);
+    }
+    catch (error) {
+        console.error("Server error", error);
+        return baseResponse(res, false, 500, "Server Error", null);
+    }
+}
+
 exports.deleteParticipant = async (req, res) => {
     try {
         const participant = await participantRepository.deleteParticipant(req.params);
