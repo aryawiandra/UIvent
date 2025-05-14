@@ -67,6 +67,22 @@ exports.getEventById = async (req, res) => {
     }
 }
 
+exports.getEventsByOrganizer = async (req, res) => {
+    try {
+        const events = await eventRepository.getEventsByOrganizer(req.params.organizationId);
+
+        if (!events?.length) {
+            return baseResponse(res, false, 404, "No events found", null);
+        }
+
+        return baseResponse(res, true, 200, "Events retrieved successfully", events);
+    }
+    catch (error) {
+        console.error("Server error", error);
+        return baseResponse(res, false, 500, "Server Error", null);
+    }
+}
+
 exports.updateEvent = async (req, res) => {
     const requiredFields = [
         'title', 

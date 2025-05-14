@@ -66,6 +66,24 @@ exports.getEventById = async (id) => {
     }
 }
 
+exports.getEventsByOrganizer = async (organizer_id) => {
+    try {
+        const res = await db.query(
+            "SELECT * FROM events WHERE organizer_id = $1", 
+            [organizer_id]
+        );
+
+        if (!res?.rows) {
+            return null;
+        }
+
+        return res.rows;
+    }
+    catch (error) {
+        console.error("Error executing query", error);
+    }
+}
+
 exports.updateEvent = async (id, datetime, event) => {
     try {
         const res = await db.query(
@@ -114,7 +132,7 @@ exports.deleteEvent = async (id) => {
         if (!res?.rows[0]) {
             return null;
         }
-        
+
         return res.rows[0];
     }
     catch (error) {

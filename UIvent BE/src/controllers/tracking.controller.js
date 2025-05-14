@@ -5,7 +5,7 @@ exports.getStatusByEvent = async (req, res) => {
     try {
         const status = await participantRepository.getStatusByEvent(req.params.eventId);
 
-        if (!status?.length) {
+        if (!status) {
             return baseResponse(res, false, 404, "Event not found", null);
         }
 

@@ -20,6 +20,7 @@ app.use('/api/categories', require("./src/routes/category.route"));
 app.use('/api/orgs', require("./src/routes/orgs.route"));
 app.use('/api/participants', require("./src/routes/participant.route"));
 app.use('/api/tracking', require("./src/routes/tracking.route"));
+app.use('/api/statistics', require("./src/routes/statistic.route"));
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
