@@ -4,6 +4,7 @@ import AuthPage from '../pages/AuthPage';
 import Events from '../pages/Events';
 import EventDetails from '../pages/EventDetails';
 import AdminDashboard from '../pages/AdminDashboard';
+import Statistics from '../pages/Statistics';
 
 export default function AppRoutes() {
     return (
@@ -14,6 +15,7 @@ export default function AppRoutes() {
                 <Route path="/events" element={<Events />} />
                 <Route path="/events/:id" element={<EventDetails />} />
                 <Route path="/admin" element={<AdminDashboard />} />
+                <Route path="/admin/statistics" element={<Statistics />} />
             </Routes>
         </Router>
     );

@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 
 const CreateEvent = ({ isOpen, onClose }) => {
+    const [isMultiDay, setIsMultiDay] = useState(false);
+    const [isIndefiniteEnd, setIsIndefiniteEnd] = useState(false);
+
     if (!isOpen) return null;
 
     return (
@@ -18,18 +21,91 @@ const CreateEvent = ({ isOpen, onClose }) => {
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Event Title</label>
                                 <input type="text" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-yellow-500 focus:border-yellow-500" />
-                            </div>
-                            <div>
+                            </div>                            <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Organization</label>
                                 <input type="text" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-yellow-500 focus:border-yellow-500" />
                             </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
-                                <input type="date" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-yellow-500 focus:border-yellow-500" />
+                            
+                            {/* Date Selection Section */}
+                            <div className="md:col-span-2">
+                                <div className="flex items-center mb-2">
+                                    <input 
+                                        type="checkbox" 
+                                        id="multiDay" 
+                                        className="mr-2 h-4 w-4 text-yellow-500 focus:ring-yellow-400"
+                                        checked={isMultiDay}
+                                        onChange={(e) => setIsMultiDay(e.target.checked)}
+                                    />
+                                    <label htmlFor="multiDay" className="text-sm font-medium text-gray-700">Multi-day event</label>
+                                </div>
+                                
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            {isMultiDay ? 'Start Date' : 'Date'}
+                                        </label>
+                                        <input 
+                                            type="date" 
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-yellow-500 focus:border-yellow-500" 
+                                        />
+                                        <p className="text-xs text-gray-500 mt-1">Format: YYYY-MM-DD</p>
+                                    </div>
+                                    
+                                    {isMultiDay && (
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+                                            <input 
+                                                type="date" 
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-yellow-500 focus:border-yellow-500" 
+                                            />
+                                            <p className="text-xs text-gray-500 mt-1">Format: YYYY-MM-DD</p>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Time</label>
-                                <input type="time" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-yellow-500 focus:border-yellow-500" />
+                            
+                            {/* Time Selection Section */}
+                            <div className="md:col-span-2">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Start Time</label>
+                                        <input 
+                                            type="time" 
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-yellow-500 focus:border-yellow-500" 
+                                        />
+                                        <p className="text-xs text-gray-500 mt-1">24-hour format (HH:MM)</p>
+                                    </div>
+                                    
+                                    <div>
+                                        <div className="flex justify-between items-center mb-1">
+                                            <label className="block text-sm font-medium text-gray-700">End Time</label>
+                                            <div className="flex items-center">
+                                                <input 
+                                                    type="checkbox" 
+                                                    id="indefiniteEnd" 
+                                                    className="mr-2 h-4 w-4 text-yellow-500 focus:ring-yellow-400"
+                                                    checked={isIndefiniteEnd}
+                                                    onChange={(e) => setIsIndefiniteEnd(e.target.checked)}
+                                                />
+                                                <label htmlFor="indefiniteEnd" className="text-sm text-gray-700">Until Finished</label>
+                                            </div>
+                                        </div>
+                                        
+                                        {!isIndefiniteEnd ? (
+                                            <>
+                                                <input 
+                                                    type="time" 
+                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-yellow-500 focus:border-yellow-500" 
+                                                />
+                                                <p className="text-xs text-gray-500 mt-1">24-hour format (HH:MM)</p>
+                                            </>
+                                        ) : (
+                                            <div className="px-3 py-2 border border-gray-300 bg-gray-50 rounded-lg text-gray-500 w-full">
+                                                Until Finished
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
                             </div>
                             <div className="md:col-span-2">
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>

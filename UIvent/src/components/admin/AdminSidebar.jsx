@@ -1,6 +1,7 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
-const AdminSidebar = ({ isOpen, onClose }) => {
+const AdminSidebar = ({ isOpen, onClose, activePage = "events" }) => {
     return (
         <>
         {/* Mobile overlay - only visible when sidebar is open on small screens */}
@@ -36,28 +37,40 @@ const AdminSidebar = ({ isOpen, onClose }) => {
             <nav>
             <ul className="space-y-2">
                 <li>
-                <a href="#" className="flex items-center px-4 py-3 text-yellow-600 bg-yellow-100 rounded-lg">
+                <Link 
+                    to="/admin" 
+                    className={`flex items-center px-4 py-3 rounded-lg ${activePage === "events" ? "text-yellow-600 bg-yellow-100" : "text-gray-600 hover:bg-yellow-50"}`}
+                >
                     <i className="fas fa-calendar-alt mr-3"></i>
                     Events
-                </a>
+                </Link>
                 </li>
                 <li>
-                <a href="#" className="flex items-center px-4 py-3 text-gray-600 hover:bg-yellow-50 rounded-lg">
+                <Link 
+                    to="#" 
+                    className={`flex items-center px-4 py-3 rounded-lg ${activePage === "users" ? "text-yellow-600 bg-yellow-100" : "text-gray-600 hover:bg-yellow-50"}`}
+                >
                     <i className="fas fa-users mr-3"></i>
                     Users
-                </a>
+                </Link>
                 </li>
                 <li>
-                <a href="#" className="flex items-center px-4 py-3 text-gray-600 hover:bg-yellow-50 rounded-lg">
+                <Link 
+                    to="/admin/statistics" 
+                    className={`flex items-center px-4 py-3 rounded-lg ${activePage === "statistics" ? "text-yellow-600 bg-yellow-100" : "text-gray-600 hover:bg-yellow-50"}`}
+                >
                     <i className="fas fa-chart-bar mr-3"></i>
-                    Analytics
-                </a>
+                    Statistics
+                </Link>
                 </li>
                 <li>
-                <a href="#" className="flex items-center px-4 py-3 text-gray-600 hover:bg-yellow-50 rounded-lg">
+                <Link 
+                    to="#" 
+                    className={`flex items-center px-4 py-3 rounded-lg ${activePage === "settings" ? "text-yellow-600 bg-yellow-100" : "text-gray-600 hover:bg-yellow-50"}`}
+                >
                     <i className="fas fa-cog mr-3"></i>
                     Settings
-                </a>
+                </Link>
                 </li>
             </ul>
             </nav>
