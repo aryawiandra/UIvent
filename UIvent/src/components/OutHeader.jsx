@@ -30,12 +30,6 @@ export default function Header({ refs }) {
                 >
                     Contact
                 </button>
-                <button
-                    onClick={() => navigate('/events')}
-                    className="text-gray-600 hover:text-yellow-600 transition-colors text-sm font-medium tracking-wide"
-                >
-                    Events
-                </button>
                 <button 
                     onClick={() => navigate('/auth')}
                     className="bg-yellow-500 text-white px-5 py-2 rounded-lg hover:bg-yellow-600 transition-all text-sm font-semibold tracking-wide shadow-sm hover:shadow active:scale-[0.98]"

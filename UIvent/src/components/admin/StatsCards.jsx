@@ -11,7 +11,7 @@ const StatsCards = () => {  return (
             <p className="text-2xl font-bold">8</p>
         </div>
         <div className="bg-white p-4 rounded-xl shadow-sm border-l-4 border-green-500">
-            <h3 className="text-gray-500 text-sm">Active</h3>
+            <h3 className="text-gray-500 text-sm">Ongoing</h3>
             <p className="text-2xl font-bold">12</p>
         </div>
         <div className="bg-white p-4 rounded-xl shadow-sm border-l-4 border-red-500">

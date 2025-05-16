@@ -1,6 +1,6 @@
 // src/App.jsx
-import { Outlet } from 'react-router-dom';
-import Header from "./components/Header";
+import { Outlet } from "react-router-dom";
+import Header from "./components/OutHeader";
 import InHeader from "./components/InHeader";
 import ScrollIndicator from "./components/ScrollIndicator";
 

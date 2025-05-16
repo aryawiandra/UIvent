@@ -18,6 +18,24 @@ export default function InHeader({ refs, user }) {
                 >
                     Profile
                 </button>
+                <button
+                    onClick={() => navigate('/events')}
+                    className="text-yellow-600 font-semibold hover:underline text-sm tracking-wide"
+                >
+                    Events
+                </button>
+                <button
+                    onClick={() => navigate('/bookmarks')}
+                    className="text-yellow-600 font-semibold hover:underline text-sm tracking-wide"
+                >
+                    Bookmarks
+                </button>
+                <div
+                    onClick={() => navigate('/')}
+                    className="bg-red-100 hover:bg-red-200 text-red-700 font-semibold text-sm tracking-wide px-4 py-2 rounded-lg cursor-pointer transition"
+                >
+                    Sign Out
+                </div>
             </nav>
         </header>
     );
