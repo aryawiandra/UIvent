@@ -47,7 +47,7 @@ exports.updateRating = async (req, res) => {
         return baseResponse(res, false, 400, "Missing rating", null);
     }
     try {
-        const participant = await participantRepository.updateRating(req.params.id, req.body.rating);
+        const participant = await participantRepository.updateRating(req.params, req.body.rating);
 
         if (!participant) {
             return baseResponse(res, false, 404, "Participant not found", null);

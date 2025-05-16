@@ -1,5 +1,6 @@
 const userRepository = require('../repositories/user.repository');
 const baseResponse = require('../utils/baseResponse.util');
+const jwtUtil = require('../utils/jwt.util');
 
 const bcrypt = require("bcrypt");
 const saltRounds = 12;
@@ -33,7 +34,7 @@ exports.registerUser = async (req, res) => {
         if (!user) {
             return baseResponse(res, false, 409, "Email already used", null);
         }
-
+        
         const { password: _removed, ...safeUser } = user;
         return baseResponse(res, true, 201, "User created", safeUser);
     }
@@ -95,8 +96,15 @@ exports.loginUser = async (req, res) => {
             return baseResponse(res, false, 401, "Invalid email or password", null);
         }
 
+        const token = jwtUtil.generateToken({ 
+            id: user.id,
+            email: user.email, 
+            role: user.role,
+            organization: user.organization 
+        });
+
         const { password: _removed, ...safeUser } = user;
-        return baseResponse(res, true, 200, "Login success", safeUser);
+        return baseResponse(res, true, 200, "Login success", { ...safeUser, token });
     }
     catch (error) {
         console.error("Server error", error);
@@ -145,6 +153,11 @@ exports.updateName = async (req, res) => {
     if (!req.body.name) {
         return baseResponse(res, false, 400, "Missing name", null);
     }
+
+    if (req.params.email !== req.user.email) {
+        return baseResponse(res, false, 403, "You are not authorized to update this user", null);
+    }
+
     try {
         const user = await userRepository.updateName(req.params.email, req.body);
 
@@ -166,6 +179,10 @@ exports.updatePassword = async (req, res) => {
 
     if (!oldPassword || !newPassword) {
         return baseResponse(res, false, 400, "Missing old or new password", null);
+    }
+
+    if (req.params.email !== req.user.email) {
+        return baseResponse(res, false, 403, "You are not authorized to update this user", null);
     }
 
     try {
@@ -195,6 +212,10 @@ exports.updatePassword = async (req, res) => {
 exports.deleteUser = async (req, res) => {
     try {
         const user = await userRepository.deleteUser(req.params.email);
+
+        if (req.params.email !== req.user.email && req.user.role !== "admin") {
+            return baseResponse(res, false, 403, "You are not authorized to delete this user", null);
+        }
 
         if (!user) {
             return baseResponse(res, false, 404, "User not found", null);

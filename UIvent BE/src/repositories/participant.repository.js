@@ -42,11 +42,14 @@ exports.getParticipantsByEvent = async (event_id) => {
     }
 }
 
-exports.updateRating = async (id, rating) => {
+exports.updateRating = async (participant, rating) => {
     try {
         const res = await db.query(
-            "UPDATE participants SET rating = $1 WHERE id = $2 RETURNING *",
-            [rating, id]
+            `UPDATE participants 
+             SET rating = $1 
+             WHERE event_id = $2 AND user_id  = $3
+             RETURNING *`,
+            [rating, participant.eventId, participant.userId]
         );
 
         if (!res?.rows[0]) {

@@ -35,6 +35,16 @@ exports.updateOrganization = async (req, res) => {
     if (!req.body.name) {
         return baseResponse(res, false, 400, "Missing organization name", null);
     }
+
+    if (req.params.id !== req.user.organization && req.user.role !== "admin") {
+        return baseResponse(
+            res, 
+            false, 
+            403, 
+            "You are not authorized to update this organization", 
+            null
+        );
+    }
     try {
         const org = await orgsRepository.updateOrganization(req.params.id, req.body);
 

@@ -53,7 +53,6 @@ exports.getGeneralStatistics = async () => {
             return null;
         }
 
-        console.log(res.rows[0]);
         return res.rows[0];
     }
     catch (error) {
@@ -124,7 +123,6 @@ exports.getGeneralStatisticsByOrganizer = async (organizerId) => {
             return null;
         }
 
-        console.log(res.rows[0]);
         return res.rows[0];
     }
     catch (error) {

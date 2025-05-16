@@ -34,6 +34,16 @@ exports.getGeneralStatistics = async (req, res) => {
 }
 
 exports.getEventStatisticsByOrganizer = async (req, res) => {
+    if (req.params.organizerId !== req.user.organization && req.user.role !== "admin") {
+        return baseResponse(
+            res, 
+            false, 
+            403, 
+            "You are not authorized to view this organization's statistics", 
+            null
+        );
+    }
+    
     try {
         const statistics = await statRepository.getEventStatisticsByOrganizer(req.params.organizerId);
 
@@ -50,6 +60,16 @@ exports.getEventStatisticsByOrganizer = async (req, res) => {
 }
 
 exports.getGeneralStatisticsByOrganizer = async (req, res) => {
+    if (req.params.organizerId !== req.user.organization && req.user.role !== "admin") {
+        return baseResponse(
+            res, 
+            false, 
+            403, 
+            "You are not authorized to view this organization's statistics", 
+            null
+        );
+    }
+    
     try {
         const statistics = await statRepository.getGeneralStatisticsByOrganizer(req.params.organizerId);
 
