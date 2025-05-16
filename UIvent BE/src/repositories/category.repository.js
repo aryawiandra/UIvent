@@ -46,6 +46,24 @@ exports.getCategoryById = async (id) => {
     }
 }
 
+exports.updateCategory = async (id, category) => {
+    try {
+        const res = await db.query(
+            "UPDATE categories SET name = $1 WHERE id = $2 RETURNING *",
+            [category.name, id]
+        );
+
+        if (!res?.rows[0]) {
+            return null;
+        }
+
+        return res.rows[0];
+    }
+    catch (error) {
+        console.error("Error executing query", error);
+    }
+}
+
 exports.deleteCategory = async (id) => {
     try {
         const res = await db.query(

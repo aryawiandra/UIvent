@@ -47,6 +47,25 @@ exports.getCategoryById = async (req, res) => {
     }
 }
 
+exports.updateCategory = async (req, res) => {
+    if (!req.body.name) {
+        return baseResponse(res, false, 400, "Missing category name", null);
+    }
+    try {
+        const category = await categoryRepository.updateCategory(req.params.id, req.body);
+
+        if (!category) {
+            return baseResponse(res, false, 404, "Category not found", null);
+        }
+
+        return baseResponse(res, true, 200, "Category updated successfully", category);
+    }
+    catch (error) {
+        console.error("Server error", error);
+        return baseResponse(res, false, 500, "Server Error", null);
+    }
+}
+
 exports.deleteCategory = async (req, res) => {
     try {       
         const category = await categoryRepository.deleteCategory(req.params.id);
