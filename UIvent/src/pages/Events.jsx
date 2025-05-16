@@ -1,5 +1,5 @@
 import EventCard from "../components/EventCard";
-import Header from "../components/Header";
+import Header from "../components/InHeader";
 import Footer from "../components/Footer";
 import { Search, Calendar, MapPin, Filter, Plus } from "lucide-react";
 
@@ -13,7 +13,7 @@ const sampleEvents = [
         time: "08:00 - 17:00 WIB",
         description: "Penerimaan mahasiswa baru periode genap tahun 2025 oleh IME FTUI. Acara ini menampilkan berbagai program studi dan fasilitas yang tersedia.",
         organization: "IME FTUI",
-        category: "Academic"
+        category: "Others"
     },
     {
         id: 2,

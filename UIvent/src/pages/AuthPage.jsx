@@ -23,6 +23,10 @@ const AuthPage = () => {
         e.preventDefault();
         console.log(formData);
         // Handle auth logic here
+
+        if (activeTab === 'login') {
+            navigate('/events'); // Redirect to events page after sign in
+        }
     };
 
     return (
