@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Input from "../components/Input";
 import Button from "../components/Button";
 import Header from "../components/OutHeader";
+import axios from "axios";
 
 const tabList = [
   { value: "login", label: "Sign In" },
