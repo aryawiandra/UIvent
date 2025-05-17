@@ -1,6 +1,6 @@
 import React from 'react';
 
-const AdminHeader = ({ onToggleSidebar }) => {
+const AdminHeader = ({ onToggleSidebar, title = "Event Management" }) => {
     return (
         <header className="bg-white shadow-sm py-4 px-6 flex justify-between items-center">
         <div className="flex items-center">
@@ -11,7 +11,7 @@ const AdminHeader = ({ onToggleSidebar }) => {
             >
             <i className="fas fa-bars"></i>
             </button>
-            <h1 className="text-2xl font-bold text-gray-800">Event Management</h1>
+            <h1 className="text-2xl font-bold text-gray-800">{title}</h1>
         </div>
         <div className="flex items-center space-x-4">
             <button className="p-2 text-gray-600 hover:bg-yellow-50 rounded-full">

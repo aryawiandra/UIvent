@@ -1,33 +1,7 @@
 import React from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
-const AdminSidebar = ({ isOpen, onClose, activeItem }) => {
-    const navigate = useNavigate();
-    const location = useLocation();
-    
-    // If activeItem is not provided, determine it from the current path
-    const currentPath = location.pathname;
-    const currentActiveItem = activeItem || (
-        currentPath.includes('/statistics') ? 'statistics' :
-        currentPath.includes('/users') ? 'users' :
-        currentPath.includes('/settings') ? 'settings' : 
-        'events'
-    );
-
-    const menuItems = [
-        { id: "events", title: "Events", icon: "fas fa-calendar-alt", path: "/admin" },
-        { id: "statistics", title: "Statistics", icon: "fas fa-chart-bar", path: "/admin/statistics" },
-        { id: "users", title: "Users", icon: "fas fa-users", path: "/admin/users" },
-        { id: "settings", title: "Settings", icon: "fas fa-cog", path: "/admin/settings" },
-    ];
-
-    const handleNavigation = (path) => {
-        navigate(path);
-        if (window.innerWidth < 1024) { // Close sidebar on mobile after navigation
-            onClose && onClose();
-        }
-    };
-
+const AdminSidebar = ({ isOpen, onClose, activePage = "events" }) => {
     return (
         <>
         {/* Mobile overlay - only visible when sidebar is open on small screens */}
@@ -59,21 +33,45 @@ const AdminSidebar = ({ isOpen, onClose, activeItem }) => {
                 </button>
             </div>
             
-            <nav className="space-y-1">
-                {menuItems.map(item => (
-                    <button
-                        key={item.id}
-                        className={`flex items-center w-full px-4 py-3 rounded-lg ${
-                            currentActiveItem === item.id
-                                ? 'text-yellow-600 bg-yellow-100'
-                                : 'text-gray-600 hover:bg-yellow-50'
-                        }`}
-                        onClick={() => handleNavigation(item.path)}
-                    >
-                        <i className={`${item.icon} mr-3`}></i>
-                        {item.title}
-                    </button>
-                ))}
+            <nav>
+            <ul className="space-y-2">
+                <li>
+                <Link 
+                    to="/admin" 
+                    className={`flex items-center px-4 py-3 rounded-lg ${activePage === "events" ? "text-yellow-600 bg-yellow-100" : "text-gray-600 hover:bg-yellow-50"}`}
+                >
+                    <i className="fas fa-calendar-alt mr-3"></i>
+                    Events
+                </Link>
+                </li>
+                <li>
+                <Link 
+                    to="#" 
+                    className={`flex items-center px-4 py-3 rounded-lg ${activePage === "users" ? "text-yellow-600 bg-yellow-100" : "text-gray-600 hover:bg-yellow-50"}`}
+                >
+                    <i className="fas fa-users mr-3"></i>
+                    Users
+                </Link>
+                </li>
+                <li>
+                <Link 
+                    to="/admin/statistics" 
+                    className={`flex items-center px-4 py-3 rounded-lg ${activePage === "statistics" ? "text-yellow-600 bg-yellow-100" : "text-gray-600 hover:bg-yellow-50"}`}
+                >
+                    <i className="fas fa-chart-bar mr-3"></i>
+                    Statistics
+                </Link>
+                </li>
+                <li>
+                <Link 
+                    to="#" 
+                    className={`flex items-center px-4 py-3 rounded-lg ${activePage === "settings" ? "text-yellow-600 bg-yellow-100" : "text-gray-600 hover:bg-yellow-50"}`}
+                >
+                    <i className="fas fa-cog mr-3"></i>
+                    Settings
+                </Link>
+                </li>
+            </ul>
             </nav>
         </div>
         </>
