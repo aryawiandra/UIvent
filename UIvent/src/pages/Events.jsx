@@ -2,48 +2,9 @@ import EventCard from "../components/EventCard";
 import Header from "../components/InHeader";
 import Footer from "../components/Footer";
 import { Search, Calendar, MapPin, Plus, ChevronDown } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-
-const sampleEvents = [
-  {
-    id: 1,
-    image: "https://images.unsplash.com/photo-1587829741301-dc798b83add3",
-    date: "Jan 15, 2025",
-    title: "PSB Genap 2025",
-    location: "Lapangan Teknik UI, Depok",
-    time: "08:00 - 17:00 WIB",
-    description:
-      "Pelepasa Sarjana aru periode genap tahun 2025 oleh IME FTUI. Acara ini menampilkan berbagai program studi dan fasilitas yang tersedia.",
-    organization: "IME FTUI",
-    category: "Others",
-  },
-  {
-    id: 2,
-    image: "https://images.unsplash.com/photo-1511578314322-379afb476865",
-    date: "Feb 20, 2025",
-    title: "COMPFEST 2025 Grand Launching",
-    location: "Balai Sidang UI, Depok",
-    time: "09:00 - 21:00 WIB",
-    description:
-      "Grand launching event teknologi terbesar di Indonesia oleh COMPFEST. Menampilkan pembicara ternama, workshop, dan berbagai kompetisi IT.",
-    organization: "COMPFEST",
-    category: "Technology",
-  },
-  {
-    id: 3,
-    image: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30",
-    date: "Mar 10, 2025",
-    title: "Exertion",
-    location: "Mochtiar Riady Plaza Quantum, Depok",
-    time: "07:00 - 15:00 WIB",
-    description:
-      "Annual sports competition organized by Exercise FTUI. Berbagai cabang olahraga akan dipertandingkan antar fakultas di lingkungan UI.",
-    organization: "Exercise FTUI",
-    category: "Sports",
-  },
-];
 
 const categoryOptions = [
   "All Events",
@@ -101,15 +62,85 @@ const Dropdown = ({ label, options, selected, setSelected }) => {
 };
 
 const Events = () => {
+  const [events, setEvents] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const eventsPerPage = 5; // Number of events to show per page
   const navigate = useNavigate();
-
-  // Filter events berdasarkan searchTerm (tidak case sensitive)
-  const filteredEvents = sampleEvents.filter((event) =>
-    event.title.toLowerCase().includes(searchTerm.toLowerCase())
+  
+  useEffect(() => {
+    setIsLoading(true);
+    setError(null);
+    
+    let url = "http://localhost:5000/api/events";
+    const params = new URLSearchParams();
+    
+    if (selectedCategory && selectedCategory !== "All Events") {
+      params.append('category', selectedCategory);
+    }
+    
+    if (selectedStatus) {
+      params.append('status', selectedStatus);
+    }
+    
+    if (params.toString()) {
+      url += `?${params.toString()}`;
+    }
+    
+    fetch(url)
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error(`Server responded with status: ${res.status}`);
+        }
+        return res.json();
+      })
+      .then((data) => {
+        if (data.success) {
+          setEvents(data.data);
+        } else {
+          setError(data.message || "Failed to fetch events");
+          setEvents([]);
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching events:", error);
+        setError("Failed to load events. Please try again later.");
+        setEvents([]);
+      })
+      .finally(() => {
+        setIsLoading(false);
+        setCurrentPage(1); // Reset to first page when filters change
+      });
+  }, [selectedCategory, selectedStatus]);
+  // Filter events based on searchTerm (case insensitive)
+  const filteredEvents = events.filter((event) =>
+    event.title?.toLowerCase().includes(searchTerm.toLowerCase())
   );
+  
+  // Calculate pagination
+  const indexOfLastEvent = currentPage * eventsPerPage;
+  const indexOfFirstEvent = indexOfLastEvent - eventsPerPage;
+  const currentEvents = filteredEvents.slice(indexOfFirstEvent, indexOfLastEvent);
+  const totalPages = Math.ceil(filteredEvents.length / eventsPerPage);
+  
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+  
+  // Previous and next page functions
+  const goToPreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+  
+  const goToNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-yellow-50 to-white">
@@ -175,18 +206,71 @@ const Events = () => {
                 setSelected={setSelectedStatus}
               />
             </div>
-          </motion.div>
-
-          {/* Event Cards - Vertical Stack */}
+          </motion.div>          {/* Event Cards - Vertical Stack */}
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.3 }}
             className="space-y-8 mb-12"
           >
-            {filteredEvents.map((event) => (
-              <EventCard key={event.id} {...event} />
-            ))}
+            {isLoading ? (
+              <div className="flex flex-col items-center py-10">
+                <div className="w-12 h-12 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+                <p className="text-gray-600 font-medium">Loading events...</p>
+              </div>
+            ) : error ? (
+              <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
+                <p className="text-red-600 font-medium mb-2">⚠️ {error}</p>
+                <button 
+                  onClick={() => window.location.reload()}
+                  className="text-red-600 underline text-sm hover:text-red-800"
+                >
+                  Try again
+                </button>
+              </div>
+            ) : currentEvents.length === 0 ? (
+              <div className="bg-gray-50 border border-gray-200 rounded-xl p-10 text-center">
+                <p className="text-gray-600 font-medium mb-2">No events found</p>
+                <p className="text-gray-500 text-sm">Try adjusting your filters or search terms</p>
+              </div>
+            ) : (
+              currentEvents.map((event) => (
+                <EventCard key={event.id} {...event} />
+              ))
+            )}
+            
+            {/* Pagination */}
+            {!isLoading && !error && filteredEvents.length > eventsPerPage && (
+              <div className="flex justify-center mt-8">
+                <div className="flex items-center space-x-2">
+                  <button 
+                    onClick={goToPreviousPage} 
+                    disabled={currentPage === 1}
+                    className={`px-3 py-2 rounded-md ${currentPage === 1 ? 'bg-gray-100 text-gray-400' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+                  >
+                    Previous
+                  </button>
+                  
+                  {Array.from({ length: totalPages }, (_, i) => (
+                    <button
+                      key={i + 1}
+                      onClick={() => paginate(i + 1)}
+                      className={`w-10 h-10 rounded-md ${currentPage === i + 1 ? 'bg-yellow-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                    >
+                      {i + 1}
+                    </button>
+                  ))}
+                  
+                  <button 
+                    onClick={goToNextPage} 
+                    disabled={currentPage === totalPages}
+                    className={`px-3 py-2 rounded-md ${currentPage === totalPages ? 'bg-gray-100 text-gray-400' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+            )}
           </motion.div>
 
           {/* Floating Action Button for Mobile */}
