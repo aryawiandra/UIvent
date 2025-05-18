@@ -93,7 +93,7 @@ const Events = () => {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const res = await axios.get("http://localhost:3000/api/events");
+        const res = await axios.get("https://uivent-production.up.railway.app/api/events");
         console.log("Backend response:", res.data);
 
         setEvents(res.data?.payload || []); // Ambil array event dari payload
