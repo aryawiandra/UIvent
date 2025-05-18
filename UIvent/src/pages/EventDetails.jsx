@@ -6,45 +6,84 @@ import {
   Clock,
   Users,
   Ticket,
-  Share2,
   Bookmark,
 } from "lucide-react";
 import { useParams, useNavigate } from "react-router-dom";
 import Footer from "../components/Footer";
 import InHeader from "../components/InHeader";
 import { motion } from "framer-motion";
+import axios from "axios";
+
+// Mapping status dari DB ke label FE
+const statusMap = {
+  perencanaan: "Upcoming",
+  berjalan: "Ongoing",
+  selesai: "Closed",
+};
 
 const EventDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  // State untuk bookmark
+  const [event, setEvent] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [bookmarked, setBookmarked] = useState(false);
 
-  // Scroll ke atas saat page ini dimount
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "instant" });
   }, []);
 
-  // In a real app, you'd fetch this data based on the ID
-  const event = {
-    id: 1,
-    image: "https://images.unsplash.com/photo-1587829741301-dc798b83add3",
-    date: "Jan 15, 2025",
-    title: "PSB Genap DTE 2025",
-    location: "Lapangan Teknik UI, Depok",
-    time: "08:00 - 17:00 WIB",
-    description:
-      "Pelepasan Sarjana Baru DTE UI 2025 adalah acara perayaan puncak keberhasilan para lulusan Fakultas Teknik UI, khususnya program studi DTE, dalam menyelesaikan pendidikan tinggi mereka.",
-    longDescription:
-      "Pelepasan Sarjana Baru DTE UI 2025 mengukir momen bersejarah yang mencerminkan dedikasi dan kerja keras para lulusan selama masa studi. Acara ini menampilkan prosesi simbolis pelepasan sarjana yang dipadukan dengan nilai kebersamaan, inovasi, dan semangat untuk menghadapi tantangan global di dunia profesional. Selain merayakan pencapaian akademik, acara ini juga menampilkan paparan visi dan harapan masa depan, memberikan inspirasi serta motivasi untuk menapaki perjalanan karir yang penuh prestasi.",
-    organization: "IME FTUI",
-    category: "Academic",
-    price: "Free",
-    capacity: "500 participants",
-    contact: "psb@ime.ui.ac.id",
-    website: "https://psb.ime.ui.ac.id",
+  useEffect(() => {
+    const fetchEvent = async () => {
+      try {
+        const res = await axios.get(`http://localhost:3000/api/events/${id}`);
+        setEvent(res.data?.payload);
+      } catch (err) {
+        setEvent(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchEvent();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        Loading...
+      </div>
+    );
+  }
+
+  if (!event) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        Event not found.
+      </div>
+    );
+  }
+
+  // Format tanggal dan waktu
+  const formatDate = (isoString) => {
+    if (!isoString) return "";
+    const date = new Date(isoString);
+    return date.toLocaleDateString("id-ID", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
   };
+  const formatTime = (isoString) => {
+    if (!isoString) return "";
+    const date = new Date(isoString);
+    return date.toLocaleTimeString("id-ID", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  // Ambil status FE dari status DB
+  const displayStatus = statusMap[event.status?.toLowerCase()] || "-";
 
   return (
     <motion.div
@@ -67,7 +106,10 @@ const EventDetails = () => {
           {/* Event Hero Section */}
           <div className="mb-8 rounded-2xl overflow-hidden shadow-md">
             <img
-              src={event.image}
+              src={
+                event.image ||
+                "https://images.unsplash.com/photo-1587829741301-dc798b83add3"
+              }
               alt={event.title}
               className="w-full h-64 md:h-80 object-cover"
             />
@@ -81,8 +123,12 @@ const EventDetails = () => {
                   {event.title}
                 </h1>
                 <p className="text-lg text-gray-600 mb-4">
-                  {event.organization}
+                  {event.organization || "Unknown Organizer"}
                 </p>
+                {/* Tampilkan status FE */}
+                <span className="inline-block bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-sm font-semibold mt-2">
+                  {displayStatus}
+                </span>
               </div>
               <div className="flex gap-2">
                 <button
@@ -101,9 +147,6 @@ const EventDetails = () => {
                     fill={bookmarked ? "#FACC15" : "none"}
                   />
                 </button>
-                <button className="p-2 rounded-full bg-white border border-gray-200 text-gray-700 hover:bg-yellow-50">
-                  <Share2 className="w-5 h-5" />
-                </button>
               </div>
             </div>
 
@@ -118,8 +161,13 @@ const EventDetails = () => {
                     <h3 className="text-sm font-medium text-gray-500">
                       Date & Time
                     </h3>
-                    <p className="text-gray-900">{event.date}</p>
-                    <p className="text-gray-900">{event.time}</p>
+                    <p className="text-gray-900">
+                      {formatDate(event.time_start)}
+                    </p>
+                    <p className="text-gray-900">
+                      {formatTime(event.time_start)} -{" "}
+                      {formatTime(event.time_end)}
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-start gap-4">
@@ -130,7 +178,7 @@ const EventDetails = () => {
                     <h3 className="text-sm font-medium text-gray-500">
                       Location
                     </h3>
-                    <p className="text-gray-900">{event.location}</p>
+                    <p className="text-gray-900">{event.venue}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-4">
@@ -139,7 +187,7 @@ const EventDetails = () => {
                   </div>
                   <div>
                     <h3 className="text-sm font-medium text-gray-500">Price</h3>
-                    <p className="text-gray-900">{event.price}</p>
+                    <p className="text-gray-900">{event.price || "Free"}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-4">
@@ -150,7 +198,7 @@ const EventDetails = () => {
                     <h3 className="text-sm font-medium text-gray-500">
                       Capacity
                     </h3>
-                    <p className="text-gray-900">{event.capacity}</p>
+                    <p className="text-gray-900">{event.capacity || "-"}</p>
                   </div>
                 </div>
               </div>
@@ -162,24 +210,23 @@ const EventDetails = () => {
             <h2 className="text-xl font-bold text-gray-900 mb-4">
               About This Event
             </h2>
-            <p className="text-gray-700 mb-6">{event.longDescription}</p>
-
+            <p className="text-gray-700 mb-6">{event.description}</p>
             <div className="space-y-4">
               <div>
                 <h3 className="text-sm font-medium text-gray-500 mb-1">
                   Contact
                 </h3>
-                <p className="text-gray-900">{event.contact}</p>
+                <p className="text-gray-900">{event.contact || "-"}</p>
               </div>
               <div>
                 <h3 className="text-sm font-medium text-gray-500 mb-1">
                   Website
                 </h3>
                 <a
-                  href={event.website}
+                  href={event.website || "#"}
                   className="text-yellow-600 hover:underline"
                 >
-                  {event.website}
+                  {event.website || "-"}
                 </a>
               </div>
             </div>
@@ -193,34 +240,6 @@ const EventDetails = () => {
             <button className="bg-white text-yellow-600 hover:bg-gray-100 px-8 py-3 rounded-lg font-medium transition-colors">
               Register Now
             </button>
-          </div>
-
-          {/* Similar Events Section */}
-          <div className="mt-12">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">
-              Similar Events
-            </h2>
-            <div className="space-y-6">
-              {/* You would map through similar events here */}
-              <div className="bg-white p-6 rounded-2xl shadow-sm flex items-center gap-4">
-                <img
-                  src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f"
-                  alt="Similar event"
-                  className="w-20 h-20 rounded-lg object-cover"
-                />
-                <div>
-                  <h3 className="font-bold text-gray-900">
-                    PMB Universitas Indonesia 2025
-                  </h3>
-                  <p className="text-sm text-gray-600">
-                    Jan 5, 2025 • 09:00 WIB
-                  </p>
-                  <button className="text-yellow-600 text-sm font-medium mt-1 hover:underline">
-                    View details
-                  </button>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </main>

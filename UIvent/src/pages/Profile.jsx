@@ -14,10 +14,10 @@ import {
 export default function Profile() {
   // State untuk form profile
   const [profile, setProfile] = useState({
-    name: "Tom Holland",
-    email: "tom.holland@ui.ac.id",
-    major: "Avengers",
-    faculty: "Faculty of Avengers",
+    name: "Peter Parker",
+    email: "peter.parker@ui.ac.id",
+    major: "Physics",
+    faculty: "FMIPA",
     organizations: "Stark Industries, Avengers",
     batch: "2022",
     phone: "+62 812-3456-7890",

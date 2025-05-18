@@ -1,9 +1,9 @@
-const db = require('../database/pg.database');
+const db = require("../database/pg.database");
 
 exports.createEvent = async (datetime, event) => {
-    try {
-        const res = await db.query(
-            `INSERT INTO events (
+  try {
+    const res = await db.query(
+      `INSERT INTO events (
                 title, 
                 description, 
                 venue, 
@@ -15,79 +15,77 @@ exports.createEvent = async (datetime, event) => {
              ) 
              VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
              RETURNING *`,
-            [
-                event.title, 
-                event.description, 
-                event.venue, 
-                datetime.start_datetime, 
-                datetime.end_datetime, 
-                event.status, 
-                event.category_id, 
-                event.organizer_id
-            ]
-        );
-        return res.rows[0];
-    }
-    catch (error) {
-        console.error("Error executing query", error);
-    }
-}
+      [
+        event.title,
+        event.description,
+        event.venue,
+        datetime.start_datetime,
+        datetime.end_datetime,
+        event.status,
+        event.category_id,
+        event.organizer_id,
+      ]
+    );
+    return res.rows[0];
+  } catch (error) {
+    console.error("Error executing query", error);
+  }
+};
 
 exports.getAllEvents = async () => {
-    try {
-        const res = await db.query("SELECT * FROM events");
+  try {
+    const res = await db.query(`
+            SELECT 
+                events.*, 
+                organizations.name AS organization
+            FROM events
+            JOIN organizations ON events.organizer_id = organizations.id
+        `);
 
-        if (!res?.rows) {
-            return null;
-        }
+    if (!res?.rows) {
+      return null;
+    }
 
-        return res.rows;
-    }
-    catch(error) {
-        console.error("Error executing query", error);
-    }
+    return res.rows;
+  } catch (error) {
+    console.error("Error executing query", error);
+  }
 };
 
 exports.getEventById = async (id) => {
-    try {
-        const res = await db.query(
-            "SELECT * FROM events WHERE id = $1", 
-            [id]
-        );
+  try {
+    const res = await db.query("SELECT * FROM events WHERE id = $1", [id]);
 
-        if (!res?.rows[0]) {
-            return null;
-        }
+    if (!res?.rows[0]) {
+      return null;
+    }
 
-        return res.rows[0];
-    }
-    catch (error) {
-        console.error("Error executing query", error);
-    }
-}
+    return res.rows[0];
+  } catch (error) {
+    console.error("Error executing query", error);
+  }
+};
 
 exports.getEventsByOrganizer = async (organizer_id) => {
-    try {
-        const res = await db.query(
-            "SELECT * FROM events WHERE organizer_id = $1", 
-            [organizer_id]
-        );
+  try {
+    const res = await db.query("SELECT * FROM events WHERE organizer_id = $1", [
+      organizer_id,
+    ]);
 
-        if (!res?.rows) {
-            return null;
-        }
+    if (!res?.rows) {
+      return null;
+    }
 
-        return res.rows;
-    }
-    catch (error) {
-        console.error("Error executing query", error);
-    }
-}
+    return res.rows;
+  } catch (error) {
+    console.error("Error executing query", error);
+  }
+};
 
 exports.updateEvent = async (id, datetime, event) => {
-    try {
-        const res = await db.query(
-            `UPDATE events 
+  try {
+    const res = await db.query(
+      `UPDATE events 
              SET title = $1, 
                  description = $2, 
                  venue = $3, 
@@ -98,44 +96,41 @@ exports.updateEvent = async (id, datetime, event) => {
                  organizer_id = $8
              WHERE id = $9
              RETURNING *`,
-            [
-                event.title, 
-                event.description, 
-                event.venue, 
-                datetime.start_datetime, 
-                datetime.end_datetime, 
-                event.status, 
-                event.category_id, 
-                event.organizer_id,
-                id
-            ]
-        );
+      [
+        event.title,
+        event.description,
+        event.venue,
+        datetime.start_datetime,
+        datetime.end_datetime,
+        event.status,
+        event.category_id,
+        event.organizer_id,
+        id,
+      ]
+    );
 
-        if (!res?.rows[0]) {
-            return null;
-        }
+    if (!res?.rows[0]) {
+      return null;
+    }
 
-        return res.rows[0];
-    }
-    catch (error) {
-        console.error("Error executing query", error);
-    }
-}
+    return res.rows[0];
+  } catch (error) {
+    console.error("Error executing query", error);
+  }
+};
 
 exports.deleteEvent = async (id) => {
-    try {
-        const res = await db.query(
-            "DELETE FROM events WHERE id = $1 RETURNING *", 
-            [id]
-        );
+  try {
+    const res = await db.query("DELETE FROM events WHERE id = $1 RETURNING *", [
+      id,
+    ]);
 
-        if (!res?.rows[0]) {
-            return null;
-        }
+    if (!res?.rows[0]) {
+      return null;
+    }
 
-        return res.rows[0];
-    }
-    catch (error) {
-        console.error("Error executing query", error);
-    }
-}
+    return res.rows[0];
+  } catch (error) {
+    console.error("Error executing query", error);
+  }
+};

@@ -1,27 +1,32 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import InHeader from "../components/InHeader";
 import Footer from "../components/Footer";
 import EventCard from "../components/EventCard";
-
-// Contoh data event yang dibookmark (ganti dengan data dari state/global store jika sudah ada)
-const bookmarkedEvents = [
-  {
-    id: 1,
-    image: "https://images.unsplash.com/photo-1587829741301-dc798b83add3",
-    date: "Jan 15, 2025",
-    title: "PSB Genap DTE 2025",
-    location: "Lapangan Teknik UI, Depok",
-    time: "08:00 - 17:00 WIB",
-    description:
-      "Pelepasan Sarjana Baru DTE UI 2025 adalah acara perayaan puncak keberhasilan para lulusan Fakultas Teknik UI.",
-    organization: "IME FTUI",
-  },
-  // Tambahkan event lain jika perlu
-];
+import axios from "axios";
 
 const Bookmarks = () => {
-  // Jika nanti ada state global, ganti bookmarkedEvents dengan state/props
-  const [events] = useState(bookmarkedEvents);
+  const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Ganti dengan cara ambil userId yang sesuai (misal dari context/auth)
+  const userId = localStorage.getItem("userId");
+
+  useEffect(() => {
+    const fetchBookmarks = async () => {
+      try {
+        const res = await axios.get(
+          `http://localhost:3000/api/bookmarks?userId=${userId}`
+        );
+        setEvents(res.data?.payload || []);
+      } catch (err) {
+        setEvents([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    if (userId) fetchBookmarks();
+    else setLoading(false);
+  }, [userId]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-yellow-50 to-white">
@@ -37,14 +42,14 @@ const Bookmarks = () => {
             </p>
           </div>
           <div className="space-y-8">
-            {events.length === 0 ? (
+            {loading ? (
+              <div className="text-center text-gray-500 py-16">Loading...</div>
+            ) : events.length === 0 ? (
               <div className="text-center text-gray-500 py-16">
                 Belum ada event yang dibookmark.
               </div>
             ) : (
-              events.map((event) => (
-                <EventCard key={event.id} {...event} />
-              ))
+              events.map((event) => <EventCard key={event.id} {...event} />)
             )}
           </div>
         </div>
