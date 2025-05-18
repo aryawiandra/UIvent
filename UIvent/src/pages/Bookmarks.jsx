@@ -15,7 +15,7 @@ const Bookmarks = () => {
     const fetchBookmarks = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:3000/api/bookmarks?userId=${userId}`
+          `https://uivent-production.up.railway.app/api/bookmarks?userId=${userId}`
         );
         setEvents(res.data?.payload || []);
       } catch (err) {

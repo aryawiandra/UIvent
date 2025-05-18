@@ -36,7 +36,7 @@ const EventDetails = () => {
   useEffect(() => {
     const fetchEvent = async () => {
       try {
-        const res = await axios.get(`http://localhost:3000/api/events/${id}`);
+        const res = await axios.get(`https://uivent-production.up.railway.app/api/events/${id}`);
         setEvent(res.data?.payload);
       } catch (err) {
         setEvent(null);
