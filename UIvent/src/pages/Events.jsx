@@ -2,48 +2,10 @@ import EventCard from "../components/EventCard";
 import Header from "../components/InHeader";
 import Footer from "../components/Footer";
 import { Search, Calendar, MapPin, Plus, ChevronDown } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-
-const sampleEvents = [
-  {
-    id: 1,
-    image: "https://images.unsplash.com/photo-1587829741301-dc798b83add3",
-    date: "Jan 15, 2025",
-    title: "PSB Genap 2025",
-    location: "Lapangan Teknik UI, Depok",
-    time: "08:00 - 17:00 WIB",
-    description:
-      "Pelepasa Sarjana aru periode genap tahun 2025 oleh IME FTUI. Acara ini menampilkan berbagai program studi dan fasilitas yang tersedia.",
-    organization: "IME FTUI",
-    category: "Others",
-  },
-  {
-    id: 2,
-    image: "https://images.unsplash.com/photo-1511578314322-379afb476865",
-    date: "Feb 20, 2025",
-    title: "COMPFEST 2025 Grand Launching",
-    location: "Balai Sidang UI, Depok",
-    time: "09:00 - 21:00 WIB",
-    description:
-      "Grand launching event teknologi terbesar di Indonesia oleh COMPFEST. Menampilkan pembicara ternama, workshop, dan berbagai kompetisi IT.",
-    organization: "COMPFEST",
-    category: "Technology",
-  },
-  {
-    id: 3,
-    image: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30",
-    date: "Mar 10, 2025",
-    title: "Exertion",
-    location: "Mochtiar Riady Plaza Quantum, Depok",
-    time: "07:00 - 15:00 WIB",
-    description:
-      "Annual sports competition organized by Exercise FTUI. Berbagai cabang olahraga akan dipertandingkan antar fakultas di lingkungan UI.",
-    organization: "Exercise FTUI",
-    category: "Sports",
-  },
-];
+import axios from "axios";
 
 const categoryOptions = [
   "All Events",
@@ -51,8 +13,29 @@ const categoryOptions = [
   "Sports",
   "Competition",
   "Arts",
+  "Concerts",
+  "Others",
 ];
-const statusOptions = ["Upcoming", "Ongoing", "Closed"];
+const statusOptions = ["All Events", "Upcoming", "Ongoing", "Closed"];
+
+// Mapping status dari DB ke label FE
+const statusMap = {
+  perencanaan: "Upcoming",
+  berjalan: "Ongoing",
+  selesai: "Closed",
+};
+
+const DEFAULT_IMAGE =
+  "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80";
+
+const categoryList = [
+  { id: "896bd5f2-6a16-4965-b5f2-1cde31509f49", name: "Competition" },
+  { id: "b0f9b36b-0bbc-40c2-a7c1-dab50befef5b", name: "Academics" },
+  { id: "c2b088be-2c7f-4a76-9ce6-9f9055fbae26", name: "Sports" },
+  { id: "9e16da27-afe0-4c51-b28e-4ea60255def4", name: "Arts" },
+  { id: "a63fb010-9e4d-48dd-8230-2e5e39b3f436", name: "Concerts" },
+  { id: "2ac657d7-6e4d-4f6c-a2e6-51f97c3e6398", name: "Others" },
+];
 
 const Dropdown = ({ label, options, selected, setSelected }) => {
   const [open, setOpen] = useState(false);
@@ -104,12 +87,49 @@ const Events = () => {
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+  const [events, setEvents] = useState([]);
   const navigate = useNavigate();
 
-  // Filter events berdasarkan searchTerm (tidak case sensitive)
-  const filteredEvents = sampleEvents.filter((event) =>
-    event.title.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const res = await axios.get("http://localhost:3000/api/events");
+        console.log("Backend response:", res.data);
+
+        setEvents(res.data?.payload || []); // Ambil array event dari payload
+      } catch (err) {
+        console.error("Fetch failed:", err);
+        setEvents([]);
+      }
+    };
+    fetchEvents();
+  }, []);
+
+  // Filter events berdasarkan searchTerm, kategori, dan status
+  const filteredEvents = events.filter((event) => {
+    // Filter nama event
+    const matchesSearch = event.title
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
+
+    // Filter kategori
+    let matchesCategory = true;
+    if (selectedCategory && selectedCategory !== "All Events") {
+      const categoryObj = categoryList.find(
+        (cat) => cat.id === event.category_id
+      );
+      matchesCategory = categoryObj && categoryObj.name === selectedCategory;
+    }
+
+    // Filter status
+    let matchesStatus = true;
+    if (selectedStatus && selectedStatus !== "All Events") {
+      const mappedStatus = statusMap[event.status?.toLowerCase()] || "";
+      matchesStatus = mappedStatus === selectedStatus;
+    }
+
+    return matchesSearch && matchesCategory && matchesStatus;
+  });
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-yellow-50 to-white">
@@ -184,9 +204,31 @@ const Events = () => {
             transition={{ duration: 0.7, delay: 0.3 }}
             className="space-y-8 mb-12"
           >
-            {filteredEvents.map((event) => (
-              <EventCard key={event.id} {...event} />
-            ))}
+            {filteredEvents.length === 0 ? (
+              <div className="text-center text-gray-500 py-16">
+                No events found.
+              </div>
+            ) : (
+              filteredEvents.map((event) => {
+                const categoryObj = categoryList.find(
+                  (cat) => cat.id === event.category_id
+                );
+                const categoryName = categoryObj
+                  ? categoryObj.name
+                  : "Uncategorized";
+                const mappedStatus =
+                  statusMap[event.status?.toLowerCase()] || "-";
+                return (
+                  <EventCard
+                    key={event.id}
+                    {...event}
+                    image={event.image || DEFAULT_IMAGE}
+                    category={categoryName}
+                    status={mappedStatus} // <-- gunakan mappedStatus, bukan event.status langsung
+                  />
+                );
+              })
+            )}
           </motion.div>
 
           {/* Floating Action Button for Mobile */}

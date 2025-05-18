@@ -41,10 +41,43 @@ const AuthPage = () => {
     setFormData({ ...formData, [e.target.name]: value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (tab === "login") {
-      navigate("/events");
+    try {
+      if (tab === "login") {
+        const res = await axios.post("http://localhost:3000/api/users/login", {
+          email: formData.email,
+          password: formData.password,
+        });
+        // Debug: tampilkan response login
+        console.log("Login response:", res.data);
+        const token = res.data.token;
+        if (token) {
+          localStorage.setItem("token", token);
+          navigate("/events");
+        } else {
+          alert("Login gagal: token tidak ditemukan.");
+        }
+      } else {
+        const res = await axios.post(
+          "http://localhost:3000/api/users/register",
+          {
+            name: formData.name,
+            email: formData.email,
+            password: formData.password,
+            role: "org",
+            organization: formData.name,
+          }
+        );
+        alert("Account created! Please login.");
+        setTab("login");
+      }
+    } catch (err) {
+      alert(
+        err.response?.data?.message ||
+          JSON.stringify(err.response?.data) ||
+          "Register/Login failed."
+      );
     }
   };
 
@@ -78,7 +111,7 @@ const AuthPage = () => {
     <div className="min-h-screen w-screen overflow-y-auto no-scrollbar bg-gradient-to-br from-yellow-50 to-white flex flex-col items-center justify-center p-4">
       <Header />
       <div className="w-full max-w-md">
-        {/* Logo & Tabs (fixed height, no movement) */}
+        {/* Logo & Tabs */}
         <div className="bg-white rounded-t-2xl shadow-lg overflow-hidden">
           <div
             className="flex flex-col items-center pt-8"
@@ -112,7 +145,6 @@ const AuthPage = () => {
                       {t.label}
                     </Tabs.Trigger>
                   ))}
-                  {/* Animated underline */}
                   <motion.div
                     layout
                     transition={{ type: "spring", stiffness: 400, damping: 30 }}
@@ -124,7 +156,7 @@ const AuthPage = () => {
             </div>
           </div>
         </div>
-        {/* Form content, only expands downward */}
+        {/* Form content */}
         <div className="bg-white rounded-b-2xl shadow-lg overflow-hidden">
           <Tabs.Root value={tab} onValueChange={handleTabChange}>
             <div className="p-8 min-h-[340px]">
