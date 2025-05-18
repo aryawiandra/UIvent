@@ -44,8 +44,9 @@ const AuthPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      const BASE_URL = "https://uivent-production.up.railway.app";
       if (tab === "login") {
-        const res = await axios.post("http://localhost:3000/api/users/login", {
+        const res = await axios.post(`${BASE_URL}/api/users/login`, {
           email: formData.email,
           password: formData.password,
         });
@@ -59,16 +60,13 @@ const AuthPage = () => {
           alert("Login gagal: token tidak ditemukan.");
         }
       } else {
-        const res = await axios.post(
-          "http://localhost:3000/api/users/register",
-          {
-            name: formData.name,
-            email: formData.email,
-            password: formData.password,
-            role: "org",
-            organization: formData.name,
-          }
-        );
+        const res = await axios.post(`${BASE_URL}/api/users/register`, {
+          name: formData.name,
+          email: formData.email,
+          password: formData.password,
+          role: "org",
+          organization: formData.name,
+        });
         alert("Account created! Please login.");
         setTab("login");
       }
