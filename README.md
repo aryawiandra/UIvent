@@ -51,7 +51,7 @@ git clone https://github.com/aryawiandra/UIvent.git
 ### Frontend
 
 - Ensure you are in the right folder  
-![Frontend]()
+![Frontend](https://hackmd.io/_uploads/r1r3NEqZee.png)
 
 - Run npm install to install all dependencies
   ```
@@ -66,7 +66,7 @@ git clone https://github.com/aryawiandra/UIvent.git
 ### Backend
 
 - Ensure you are in the right folder  
-![Backend]()
+![Backend](https://hackmd.io/_uploads/S171S4qZee.png)
 
 - Run npm install to install all dependencies
   ```
