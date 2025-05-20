@@ -33,10 +33,13 @@ const EventDetails = () => {
     window.scrollTo({ top: 0, behavior: "instant" });
   }, []);
 
+  // Ambil data event
   useEffect(() => {
     const fetchEvent = async () => {
       try {
-        const res = await axios.get(`https://uivent-production.up.railway.app/api/events/${id}`);
+        const res = await axios.get(
+          `https://uivent-production.up.railway.app/api/events/${id}`
+        );
         setEvent(res.data?.payload);
       } catch (err) {
         setEvent(null);
@@ -46,6 +49,48 @@ const EventDetails = () => {
     };
     fetchEvent();
   }, [id]);
+
+  // Cek status bookmark saat event sudah didapat
+  useEffect(() => {
+    const checkBookmark = async () => {
+      if (!event) return;
+      try {
+        const res = await axios.get(
+          `https://uivent-production.up.railway.app/api/bookmarks/status?eventId=${event.id}`,
+          { withCredentials: true }
+        );
+        setBookmarked(res.data?.payload?.bookmarked || false);
+      } catch (err) {
+        setBookmarked(false);
+      }
+    };
+    if (event) checkBookmark();
+  }, [event]);
+
+  // Handler tambah/hapus bookmark
+  const handleBookmark = async () => {
+    if (!event) return;
+    try {
+      if (!bookmarked) {
+        // Tambah bookmark
+        await axios.post(
+          "https://uivent-production.up.railway.app/api/bookmarks",
+          { eventId: event.id },
+          { withCredentials: true }
+        );
+        setBookmarked(true);
+      } else {
+        // Hapus bookmark
+        await axios.delete(
+          `https://uivent-production.up.railway.app/api/bookmarks/${event.id}`,
+          { withCredentials: true }
+        );
+        setBookmarked(false);
+      }
+    } catch (err) {
+      alert("Gagal mengubah bookmark!");
+    }
+  };
 
   if (loading) {
     return (
@@ -135,7 +180,7 @@ const EventDetails = () => {
                   className={`p-2 rounded-full border border-gray-200 hover:bg-yellow-50 transition ${
                     bookmarked ? "bg-yellow-100 border-yellow-300" : "bg-white"
                   }`}
-                  onClick={() => setBookmarked((prev) => !prev)}
+                  onClick={handleBookmark}
                   aria-label="Bookmark"
                 >
                   <Bookmark

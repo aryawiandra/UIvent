@@ -1,16 +1,21 @@
 const bookmarksRepo = require("../repositories/bookmarks.repository");
 const baseResponse = require("../utils/baseResponse.util");
 
-// Pastikan userId didapat dari req.user (middleware auth) atau req.body (sementara)
+// Tambah bookmark (POST /api/bookmarks)
 exports.addBookmark = async (req, res) => {
+  const userId = req.user?.id; // dari middleware auth
   const { eventId } = req.body;
-  const userId = req.user?.id || req.body.userId; // sesuaikan dengan implementasi auth kamu
 
   if (!userId || !eventId) {
     return baseResponse(res, false, 400, "userId and eventId required", null);
   }
 
   try {
+    // Cek apakah sudah ada
+    const exists = await bookmarksRepo.isBookmarked(userId, eventId);
+    if (exists) {
+      return baseResponse(res, false, 409, "Already bookmarked", null);
+    }
     const bookmark = await bookmarksRepo.addBookmark(userId, eventId);
     return baseResponse(res, true, 201, "Bookmarked", bookmark);
   } catch (error) {
@@ -18,24 +23,26 @@ exports.addBookmark = async (req, res) => {
   }
 };
 
+// Hapus bookmark (DELETE /api/bookmarks/:eventId)
 exports.removeBookmark = async (req, res) => {
+  const userId = req.user?.id;
   const { eventId } = req.params;
-  const userId = req.user?.id || req.body.userId;
 
   if (!userId || !eventId) {
     return baseResponse(res, false, 400, "userId and eventId required", null);
   }
 
   try {
-    const removed = await bookmarksRepo.removeBookmark(userId, eventId);
-    return baseResponse(res, true, 200, "Bookmark removed", removed);
+    await bookmarksRepo.removeBookmark(userId, eventId);
+    return baseResponse(res, true, 200, "Bookmark removed", null);
   } catch (error) {
     return baseResponse(res, false, 500, "Server Error", null);
   }
 };
 
+// Ambil semua bookmark milik user (GET /api/bookmarks)
 exports.getBookmarksByUser = async (req, res) => {
-  const userId = req.user?.id || req.query.userId;
+  const userId = req.user?.id;
 
   if (!userId) {
     return baseResponse(res, false, 400, "userId required", null);
@@ -49,8 +56,9 @@ exports.getBookmarksByUser = async (req, res) => {
   }
 };
 
+// Cek status bookmark (GET /api/bookmarks/status?eventId=...)
 exports.isBookmarked = async (req, res) => {
-  const userId = req.user?.id || req.query.userId;
+  const userId = req.user?.id;
   const { eventId } = req.query;
 
   if (!userId || !eventId) {
@@ -59,7 +67,9 @@ exports.isBookmarked = async (req, res) => {
 
   try {
     const bookmarked = await bookmarksRepo.isBookmarked(userId, eventId);
-    return baseResponse(res, true, 200, "Bookmark status fetched", { bookmarked });
+    return baseResponse(res, true, 200, "Bookmark status fetched", {
+      bookmarked,
+    });
   } catch (error) {
     return baseResponse(res, false, 500, "Server Error", null);
   }

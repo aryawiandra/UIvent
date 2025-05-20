@@ -1,17 +1,21 @@
 const db = require("../database/pg.database");
 const cloudinary = require('cloudinary').v2;
 
+// CREATE EVENT
 exports.createEvent = async (datetime, event, file) => {
   try {
-    const img = await new Promise((resolve, reject) => {
-      cloudinary.uploader.upload_stream({ resource_type: "image" }, (error, uploadResult) => {
-        if (error) return reject(error);
-        resolve({
-          image_url: uploadResult.secure_url,
-          public_id: uploadResult.public_id
-        });
-      }).end(file.buffer);
-    });
+    let img = { image_url: null, public_id: null };
+    if (file) {
+      img = await new Promise((resolve, reject) => {
+        cloudinary.uploader.upload_stream({ resource_type: "image" }, (error, uploadResult) => {
+          if (error) return reject(error);
+          resolve({
+            image_url: uploadResult.secure_url,
+            public_id: uploadResult.public_id
+          });
+        }).end(file.buffer);
+      });
+    }
 
     const res = await db.query(
       `INSERT INTO events (
@@ -47,6 +51,7 @@ exports.createEvent = async (datetime, event, file) => {
   }
 };
 
+// GET ALL EVENTS
 exports.getAllEvents = async () => {
   try {
     const res = await db.query(`
@@ -55,6 +60,7 @@ exports.getAllEvents = async () => {
         organizations.name AS organization
       FROM events
       JOIN organizations ON events.organizer_id = organizations.id
+      ORDER BY events.created_at DESC
     `);
 
     if (!res?.rows) {
@@ -67,53 +73,56 @@ exports.getAllEvents = async () => {
   }
 };
 
+// GET EVENT BY ID
 exports.getEventById = async (id) => {
   try {
     const res = await db.query("SELECT * FROM events WHERE id = $1", [id]);
-
     if (!res?.rows[0]) {
       return null;
     }
-
     return res.rows[0];
   } catch (error) {
     console.error("Error executing query", error);
   }
 };
 
+// GET EVENTS BY ORGANIZER
 exports.getEventsByOrganizer = async (organizer_id) => {
   try {
     const res = await db.query("SELECT * FROM events WHERE organizer_id = $1", [
       organizer_id,
     ]);
-
     if (!res?.rows) {
       return null;
     }
-
     return res.rows;
   } catch (error) {
     console.error("Error executing query", error);
   }
 };
 
+// UPDATE EVENT
 exports.updateEvent = async (id, datetime, event, file, oldEvent) => {
   try {
-    // Delete old image from Cloudinary
-    await cloudinary.uploader.destroy(oldEvent.image_pid, {
-      resource_type: "image"
-    });
+    let img = { image_url: oldEvent.image_url, public_id: oldEvent.image_pid };
 
-    // Upload new image
-    const img = await new Promise((resolve, reject) => {
-      cloudinary.uploader.upload_stream({ resource_type: "image" }, (error, uploadResult) => {
-        if (error) return reject(error);
-        resolve({
-          image_url: uploadResult.secure_url,
-          public_id: uploadResult.public_id
+    // If a new file is provided, replace the old image
+    if (file) {
+      if (oldEvent.image_pid) {
+        await cloudinary.uploader.destroy(oldEvent.image_pid, {
+          resource_type: "image"
         });
-      }).end(file.buffer);
-    });
+      }
+      img = await new Promise((resolve, reject) => {
+        cloudinary.uploader.upload_stream({ resource_type: "image" }, (error, uploadResult) => {
+          if (error) return reject(error);
+          resolve({
+            image_url: uploadResult.secure_url,
+            public_id: uploadResult.public_id
+          });
+        }).end(file.buffer);
+      });
+    }
 
     const res = await db.query(
       `UPDATE events 
@@ -154,20 +163,22 @@ exports.updateEvent = async (id, datetime, event, file, oldEvent) => {
   }
 };
 
+// DELETE EVENT
 exports.deleteEvent = async (id) => {
   try {
     const res = await db.query("DELETE FROM events WHERE id = $1 RETURNING *", [
       id,
     ]);
-
     if (!res?.rows[0]) {
       return null;
     }
 
-    // Delete image from Cloudinary
-    await cloudinary.uploader.destroy(res.rows[0].image_pid, {
-      resource_type: "image"
-    });
+    // Delete image from Cloudinary if exists
+    if (res.rows[0].image_pid) {
+      await cloudinary.uploader.destroy(res.rows[0].image_pid, {
+        resource_type: "image"
+      });
+    }
 
     return res.rows[0];
   } catch (error) {

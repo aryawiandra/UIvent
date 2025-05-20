@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Header from "../components/InHeader";
 import Footer from "../components/Footer";
@@ -10,39 +10,74 @@ import {
   Mail,
   Check,
 } from "lucide-react";
+import axios from "axios";
 
 export default function Profile() {
   // State untuk form profile
   const [profile, setProfile] = useState({
-    name: "Peter Parker",
-    email: "peter.parker@ui.ac.id",
-    major: "Physics",
-    faculty: "FMIPA",
-    organizations: "Stark Industries, Avengers",
-    batch: "2022",
-    phone: "+62 812-3456-7890",
-    bio: "With great power comes great responsibility.",
-    photo:
-      "https://static1.srcdn.com/wordpress/wp-content/uploads/2024/03/spider-man-in-his-iron-spider-costume-in-spider-man-no-way-home.jpg?q=50&fit=crop&w=1140&h=&dpr=1.5",
+    name: "",
+    email: "",
+    major: "",
+    faculty: "",
+    organizations: "",
+    batch: "",
+    phone: "",
+    bio: "",
+    photo: "",
+    role: "",
+    created_at: "",
   });
 
+  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+
+  // Ambil data user dari backend saat komponen mount
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const res = await axios.get("https://uivent.vercel.app/profile", {
+          // Jika perlu token: headers: { Authorization: `Bearer ${token}` }
+          withCredentials: true, // jika pakai cookie
+        });
+        setProfile(res.data);
+      } catch (err) {
+        alert("Gagal mengambil data profile!");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProfile();
+  }, []);
 
   const handleChange = (e) => {
     setProfile({ ...profile, [e.target.name]: e.target.value });
   };
 
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
     setSaving(true);
     setSaved(false);
-    setTimeout(() => {
-      setSaving(false);
+    try {
+      await axios.put("https://uivent.vercel.app/profile", profile, {
+        withCredentials: true,
+      });
       setSaved(true);
       setTimeout(() => setSaved(false), 1800);
-    }, 1200);
+    } catch (err) {
+      alert("Gagal menyimpan profile!");
+    } finally {
+      setSaving(false);
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-yellow-50">
+        <span className="text-yellow-600 font-semibold text-lg">Loading profile...</span>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-yellow-50 to-white">
@@ -57,12 +92,15 @@ export default function Profile() {
             onSubmit={handleSave}
           >
             <img
-              src={profile.photo}
+              src={
+                profile.photo ||
+                "https://ui-avatars.com/api/?name=" +
+                  encodeURIComponent(profile.name || "User")
+              }
               alt={profile.name}
               className="w-32 h-32 rounded-full border-4 border-yellow-200 shadow mb-6 object-cover"
             />
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 w-full mb-8">
-              {/* ...input fields... */}
               <div className="flex flex-col gap-1">
                 <label className="text-sm text-gray-500 flex items-center gap-1">
                   <User className="w-5 h-5 text-yellow-500" /> Name
@@ -85,6 +123,7 @@ export default function Profile() {
                   onChange={handleChange}
                   className="border border-gray-200 rounded-lg px-4 py-2 focus:ring-2 focus:ring-yellow-400"
                   required
+                  disabled
                 />
               </div>
               <div className="flex flex-col gap-1">

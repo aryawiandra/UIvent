@@ -1,6 +1,6 @@
+const express = require("express");
 const eventController = require("../controllers/event.controller");
 const { authenticate, authorize } = require('../middleware/auth.middleware');
-const express = require('express');
 const multer = require('multer');
 const router = express.Router();
 
