@@ -1,29 +1,29 @@
 # UIvent - Sistem Manajemen Proker Mahasiswa UI
 
-UIvent adalah platform berbasis web untuk manajemen dan dokumentasi program kerja (proker) atau event yang diadakan oleh organisasi kemahasiswaan di Universitas Indonesia. Aplikasi ini membantu organisasi seperti BEM, Himpunan, dan UKM untuk mengelola, mempublikasikan, dan melacak status acara mereka dengan mudah, serta mempermudah untuk mendapatkan peserta
+UIvent is a web-based platform that aims to help the management and documentation of work programs (proker) or events held by student organizations at the University of Indonesia. This application goal is to help organizations (ex: BEM, Himpunan, and UKM) to easily manage, publish, and track the status of their events, as well as making it more accessible for participants to register and updated.
 
 ---
 
-# 📌 Fitur Utama
+## 📌 Fitur Utama
 
-- 🔐 **Autentikasi dan Role**
-  - Role `Umum`: Melihat dan mencari event
-  - Role `Organisasi`: CRUD event proker mereka sendiri
-  - Role `Admin`: CRUD semua data dan melihat statistik global
+- 🔐 **Autentication and Role**
+  - Public Role: View and search for events
+  - Organization Role: CRUD their own work program events
+  - Admin Role: CRUD all data and view global statistics
 
-- 🗂️ **Manajemen Proker/Event**
-  - Buat, ubah, dan hapus event
-  - Kategorisasi event (Seni, Olahraga, Lomba, dll)
+- 🗂️ **Work Program/Event Management** 
+  - Create, edit, and delete events
+  - Event categorization (Art, Sports, Competition, etc.)
 
-- 📊 **Statistik Aktivitas**
-  - Jumlah peserta event
-  - Kepuasan peserta terhadap event (rating)
+- 📊 **Activity Statistics**
+  - Number of event participants
+  - Participants satisfaction towards the event (rating)
 
-- 🔍 **Pencarian dan Filter**
-  - Berdasarkan kategori dan organisasi
+- 🔍 **Search dan Filter**
+  - Based on category and organization
 
-- ✅ **Tracking Status Proker**
-  - Status: Perencanaan, Berjalan, Selesai
+- ✅ **Tracking Status**
+  - Status: Planning, In Progress, Completed
 
 ## 💻 Tech Stack:
 
@@ -35,9 +35,10 @@ Database UML:
 ![UML](./Kelengkapan/Database%20UML.png)
 
 Entity Relationship Diagram:  
-
+![ERD](./Kelengkapan/ERD.png)
 
 Flowchart:  
+![Flowchart](./Kelengkapan/Flowchart.png)
 
 
 ## 💻 Installation Guide
@@ -50,7 +51,7 @@ git clone https://github.com/aryawiandra/UIvent.git
 ### Frontend
 
 - Ensure you are in the right folder  
-![Frontend]()
+![Frontend](https://hackmd.io/_uploads/r1r3NEqZee.png)
 
 - Run npm install to install all dependencies
   ```
@@ -65,7 +66,7 @@ git clone https://github.com/aryawiandra/UIvent.git
 ### Backend
 
 - Ensure you are in the right folder  
-![Backend]()
+![Backend](https://hackmd.io/_uploads/S171S4qZee.png)
 
 - Run npm install to install all dependencies
   ```
