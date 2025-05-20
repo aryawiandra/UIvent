@@ -47,7 +47,8 @@ exports.createEvent = async (req, res) => {
   try {
     const event = await eventRepository.createEvent(
       { start_datetime, end_datetime },
-      req.body
+      req.body,
+      req.file
     );
     return baseResponse(res, true, 201, "Event created successfully", event);
   } catch (error) {
@@ -141,14 +142,14 @@ exports.updateEvent = async (req, res) => {
     );
   }
 
-  let event = await eventRepository.getEventById(req.params.id);
+  const oldEvent = await eventRepository.getEventById(req.params.id);
 
-  if (!event) {
+  if (!oldEvent) {
     return baseResponse(res, false, 404, "Event not found", null);
   }
 
   if (
-    event.organizer_id !== req.user.organization &&
+    oldEvent.organizer_id !== req.user.organization &&
     req.user.role !== "admin"
   ) {
     return baseResponse(
@@ -166,10 +167,12 @@ exports.updateEvent = async (req, res) => {
   const end_datetime = `${end_date}T${end_time}:00Z`;
 
   try {
-    event = await eventRepository.updateEvent(
+    const event = await eventRepository.updateEvent(
       req.params.id,
       { start_datetime, end_datetime },
-      req.body
+      req.body,
+      req.file,
+      oldEvent
     );
     return baseResponse(res, true, 200, "Event updated successfully", event);
   } catch (error) {

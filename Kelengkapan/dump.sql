@@ -109,6 +109,8 @@ CREATE TABLE public.events (
     id uuid DEFAULT public.uuid_generate_v4() NOT NULL,
     title character varying(255) NOT NULL,
     description text,
+    image_url text,
+    image_pid text,
     venue character varying(255),
     time_start timestamp with time zone NOT NULL,
     time_end timestamp with time zone NOT NULL,
