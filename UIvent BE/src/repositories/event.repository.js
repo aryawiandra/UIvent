@@ -1,23 +1,38 @@
 const db = require("../database/pg.database");
+const cloudinary = require('cloudinary').v2;
 
-exports.createEvent = async (datetime, event) => {
+exports.createEvent = async (datetime, event, file) => {
   try {
+    const img = await new Promise((resolve, reject) => {
+      cloudinary.uploader.upload_stream({ resource_type: "image" }, (error, uploadResult) => {
+        if (error) return reject(error);
+        resolve({
+          image_url: uploadResult.secure_url,
+          public_id: uploadResult.public_id
+        });
+      }).end(file.buffer);
+    });
+
     const res = await db.query(
       `INSERT INTO events (
-                title, 
-                description, 
-                venue, 
-                time_start, 
-                time_end, 
-                status, 
-                category_id, 
-                organizer_id
-             ) 
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
-             RETURNING *`,
+        title, 
+        description, 
+        image_url,
+        image_pid,
+        venue, 
+        time_start, 
+        time_end, 
+        status, 
+        category_id, 
+        organizer_id
+      ) 
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) 
+      RETURNING *`,
       [
         event.title,
         event.description,
+        img.image_url,
+        img.public_id,
         event.venue,
         datetime.start_datetime,
         datetime.end_datetime,
@@ -35,12 +50,12 @@ exports.createEvent = async (datetime, event) => {
 exports.getAllEvents = async () => {
   try {
     const res = await db.query(`
-            SELECT 
-                events.*, 
-                organizations.name AS organization
-            FROM events
-            JOIN organizations ON events.organizer_id = organizations.id
-        `);
+      SELECT 
+        events.*, 
+        organizations.name AS organization
+      FROM events
+      JOIN organizations ON events.organizer_id = organizations.id
+    `);
 
     if (!res?.rows) {
       return null;
@@ -82,23 +97,43 @@ exports.getEventsByOrganizer = async (organizer_id) => {
   }
 };
 
-exports.updateEvent = async (id, datetime, event) => {
+exports.updateEvent = async (id, datetime, event, file, oldEvent) => {
   try {
+    // Delete old image from Cloudinary
+    await cloudinary.uploader.destroy(oldEvent.image_pid, {
+      resource_type: "image"
+    });
+
+    // Upload new image
+    const img = await new Promise((resolve, reject) => {
+      cloudinary.uploader.upload_stream({ resource_type: "image" }, (error, uploadResult) => {
+        if (error) return reject(error);
+        resolve({
+          image_url: uploadResult.secure_url,
+          public_id: uploadResult.public_id
+        });
+      }).end(file.buffer);
+    });
+
     const res = await db.query(
       `UPDATE events 
-             SET title = $1, 
-                 description = $2, 
-                 venue = $3, 
-                 time_start = $4, 
-                 time_end = $5, 
-                 status = $6, 
-                 category_id = $7, 
-                 organizer_id = $8
-             WHERE id = $9
-             RETURNING *`,
+        SET title = $1, 
+            description = $2,
+            image_url = $3,
+            image_pid = $4, 
+            venue = $5,  
+            time_start = $6, 
+            time_end = $7, 
+            status = $8, 
+            category_id = $9, 
+            organizer_id = $10
+        WHERE id = $11
+        RETURNING *`,
       [
         event.title,
         event.description,
+        img.image_url,
+        img.public_id,
         event.venue,
         datetime.start_datetime,
         datetime.end_datetime,
@@ -128,6 +163,11 @@ exports.deleteEvent = async (id) => {
     if (!res?.rows[0]) {
       return null;
     }
+
+    // Delete image from Cloudinary
+    await cloudinary.uploader.destroy(res.rows[0].image_pid, {
+      resource_type: "image"
+    });
 
     return res.rows[0];
   } catch (error) {
