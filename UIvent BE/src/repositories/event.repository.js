@@ -33,23 +33,15 @@ exports.createEvent = async (datetime, event) => {
 };
 
 exports.getAllEvents = async () => {
-  try {
-    const res = await db.query(`
-            SELECT 
-                events.*, 
-                organizations.name AS organization
-            FROM events
-            JOIN organizations ON events.organizer_id = organizations.id
-        `);
-
-    if (!res?.rows) {
-      return null;
-    }
-
-    return res.rows;
-  } catch (error) {
-    console.error("Error executing query", error);
-  }
+  const { rows } = await db.query(`
+    SELECT 
+      events.*, 
+      organizations.name AS organization_name
+    FROM events
+    LEFT JOIN organizations ON events.organizer_id = organizations.id
+    ORDER BY events.created_at DESC
+  `);
+  return rows;
 };
 
 exports.getEventById = async (id) => {
@@ -82,41 +74,44 @@ exports.getEventsByOrganizer = async (organizer_id) => {
   }
 };
 
-exports.updateEvent = async (id, datetime, event) => {
-  try {
-    const res = await db.query(
-      `UPDATE events 
-             SET title = $1, 
-                 description = $2, 
-                 venue = $3, 
-                 time_start = $4, 
-                 time_end = $5, 
-                 status = $6, 
-                 category_id = $7, 
-                 organizer_id = $8
-             WHERE id = $9
-             RETURNING *`,
-      [
-        event.title,
-        event.description,
-        event.venue,
-        datetime.start_datetime,
-        datetime.end_datetime,
-        event.status,
-        event.category_id,
-        event.organizer_id,
-        id,
-      ]
-    );
+exports.updateEvent = async (id, { start_datetime, end_datetime }, body) => {
+  const {
+    title,
+    description,
+    venue,
+    status,
+    category_id,
+    organizer_id,
+    image_url,
+  } = body;
 
-    if (!res?.rows[0]) {
-      return null;
-    }
-
-    return res.rows[0];
-  } catch (error) {
-    console.error("Error executing query", error);
-  }
+  const { rows } = await db.query(
+    `UPDATE events SET
+       title = $1,
+       description = $2,
+       venue = $3,
+       time_start = $4,
+       time_end = $5,
+       status = $6,
+       category_id = $7,
+       organizer_id = $8,
+       image_url = $9
+     WHERE id = $10
+     RETURNING *`,
+    [
+      title,
+      description,
+      venue,
+      start_datetime,
+      end_datetime,
+      status,
+      category_id,
+      organizer_id,
+      image_url,
+      id,
+    ]
+  );
+  return rows[0];
 };
 
 exports.deleteEvent = async (id) => {
