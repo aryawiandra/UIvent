@@ -275,3 +275,45 @@ exports.deleteUser = async (req, res) => {
     return baseResponse(res, false, 500, "Server Error", null);
   }
 };
+
+// Ambil profile user yang sedang login (dari token)
+exports.getProfile = async (req, res) => {
+  try {
+    // req.user diisi oleh middleware autentikasi JWT
+    const user = await userRepository.getUserByEmail(req.user.email);
+    if (!user) {
+      return baseResponse(res, false, 404, "User not found", null);
+    }
+    const { password: _removed, ...safeUser } = user;
+    return baseResponse(res, true, 200, "Profile fetched", safeUser);
+  } catch (error) {
+    console.error("Server error", error);
+    return baseResponse(res, false, 500, "Server Error", null);
+  }
+};
+
+exports.updateProfile = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const updateData = { ...req.body };
+
+    // Jika ada file, simpan path/URL ke DB
+    if (req.file) {
+      // Contoh: simpan path relatif, atau upload ke cloud lalu simpan URL
+      updateData.photo = `/uploads/${req.file.filename}`;
+    }
+
+    // Update ke database (pastikan userRepository mendukung update by id)
+    const updatedUser = await userRepository.updateProfile(userId, updateData);
+
+    if (!updatedUser) {
+      return baseResponse(res, false, 404, "User not found", null);
+    }
+
+    const { password: _removed, ...safeUser } = updatedUser;
+    return baseResponse(res, true, 200, "Profile updated", safeUser);
+  } catch (error) {
+    console.error("Server error", error);
+    return baseResponse(res, false, 500, "Server Error", null);
+  }
+};
